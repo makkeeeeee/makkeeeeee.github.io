@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>📦 Intelligent Pickup System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+      background: #f0f0f0;
+    }
+    h1 {
+      color: #333;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 16px;
+      margin: 10px;
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 16px;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 Intelligent Pickup System</h1>
+  <p>Please select or enter a pickup box ID:</p>
+
+  <select id="boxSelect">
+    <option value="0001">0001（First box）</option>
+    <option value="0002">0002（Second box）</option>
+    <option value="0003">0003（Third box）</option>
+  </select>
+
+  <button onclick="openBox()">🔓 Open the box</button>
+
+  <div id="msg" class="status"></div>
+
+  <script>
+    const espIP = "192.168.100.173"; // ← 替换为你的 ESP32 IP
+
+    function openBox() {
+      const id = document.getElementById("boxSelect").value;
+      const url = `http://${espIP}/open?id=${id}`;
+
+      fetch(url)
+        .then(res => res.text())
+        .then(txt => {
+          document.getElementById("msg").innerText = txt;
+        })
+        .catch(err => {
+          document.getElementById("msg").innerText = "❌ Unable to connect to ESP32";
+        });
+    }
+  </script>
+</body>
+</html>
