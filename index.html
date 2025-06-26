@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>智能取件系统</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; text-align: center; padding: 50px; }
+    input { padding: 10px; width: 200px; font-size: 16px; }
+    button { padding: 10px 20px; font-size: 16px; margin-left: 10px; cursor: pointer; }
+    .status { margin-top: 20px; font-size: 14px; color: green; }
+  </style>
+</head>
+<body>
+  <h1>📦 智能取件系统</h1>
+  <p>请输入你的取件 ID：</p>
+  <input id="boxId" placeholder="例如：0001">
+  <button onclick="openBox()">打开取件箱</button>
+  <div id="msg" class="status"></div>
+
+  <script>
+    const espIp = "192.168.100.173"; // ✅ 这里填你的 ESP32 IP
+    function openBox() {
+      const id = document.getElementById("boxId").value.trim();
+      if (!id) return alert("请输入 ID");
+      const url = `http://${espIp}/open?id=${id}`;
+      fetch(url)
+        .then(resp => resp.text().then(txt => {
+          document.getElementById("msg").innerText = txt;
+        }))
+        .catch(err => {
+          document.getElementById("msg").innerText = "请求失败，请确保 ESP32 在线";
+        });
+    }
+  </script>
+</body>
+</html>
