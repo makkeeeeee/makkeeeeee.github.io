@@ -1,60 +1,61 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>📦 Intelligent Pickup System</title>
+  <meta charset="UTF-8" />
+  <title>📦 Smart Parcel Locker</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-      background: #f0f0f0;
-    }
-    h1 {
-      color: #333;
-    }
-    input, select, button {
-      padding: 10px;
-      font-size: 16px;
-      margin: 10px;
-    }
-    .status {
-      margin-top: 20px;
-      font-size: 16px;
-      color: green;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 50px; }
+    input, button { font-size: 18px; padding: 10px; margin: 10px; }
+    .msg { font-size: 18px; color: #333; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>📦 Intelligent Pickup System</h1>
-  <p>Please select or enter a pickup box ID:</p>
-
-  <select id="boxSelect">
-    <option value="0001">0001（First box）</option>
-    <option value="0002">0002（Second box）</option>
-    <option value="0003">0003（Third box）</option>
-  </select>
-
-  <button onclick="openBox()">🔓 Open the box</button>
-
-  <div id="msg" class="status"></div>
+  <h1>📦 Smart Parcel Locker</h1>
+  <p>Please enter your client ID (e.g., 0001 or 0002):</p>
+  <input type="text" id="clientId" placeholder="Enter ID like 0001" />
+  <br>
+  <button onclick="openBox()">Open Box</button>
+  <div id="status" class="msg"></div>
 
   <script>
-    const espIP = "192.168.43.36"; // ← 替换为你的 ESP32 IP
+    const esp32_ip = "192.168.43.36";  // ← Replace with your ESP32 IP
 
     function openBox() {
-      const id = document.getElementById("boxSelect").value;
-      const url = `http://${espIP}/open?id=${id}`;
+      const id = document.getElementById("clientId").value.trim();
+      if (!id) {
+        document.getElementById("status").innerText = "❌ Please enter a valid ID.";
+        return;
+      }
 
-      fetch(url)
+      fetch(`http://${esp32_ip}/open?id=${id}`)
         .then(res => res.text())
-        .then(txt => {
-          document.getElementById("msg").innerText = txt;
+        .then(msg => {
+          document.getElementById("status").innerText =
+            `📦 Box for client ${id} is now open. Please take your parcel (10 seconds)...`;
+
+          let seconds = 10;
+          const countdown = setInterval(() => {
+            seconds--;
+            if (seconds > 0) {
+              document.getElementById("status").innerText =
+                `📦 Box for client ${id} is open. ${seconds} seconds remaining...`;
+            } else {
+              clearInterval(countdown);
+              document.getElementById("status").innerText =
+                `✅ Client ${id}'s parcel has been picked up. Box is now empty.`;
+
+              setTimeout(() => {
+                document.getElementById("clientId").value = "";
+                document.getElementById("status").innerText = "";
+              }, 3000);
+            }
+          }, 1000);
         })
-        .catch(err => {
-          document.getElementById("msg").innerText = "❌ Unable to connect to ESP32";
+        .catch(() => {
+          document.getElementById("status").innerText = "❌ Could not connect to ESP32.";
         });
     }
   </script>
 </body>
 </html>
+
